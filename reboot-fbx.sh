@@ -6,11 +6,13 @@ APP_VERSION="0.0.1"
 DEVICE_NAME="$(hostname -s)"
 FREEBOX_BASE_URL='http://mafreebox.freebox.fr'
 
-[ -z $DEBUG ] && exec 2>/dev/null #|| set -x
+[ -z $DEBUG ] && exec 2>/dev/null || set -x
 echo "***DEBUG***" >&2
 
-config=${CONFIG:-'config'}
+config=${CONFIG:-"$HOME/.reboot-fbx.conf"}
 # set -eu
+set -e
+set -o pipefail
 
 function read_config() {
   set -a
@@ -71,8 +73,8 @@ function hmac_sha1() {
   echo -n "$challenge" | openssl sha1 -hmac "$app_token" | awk '{print $2}'
 }
 
-echo "$APP_ID"
-echo "- config file: $config"
+echo "$APP_ID" >&2
+echo "- config file: $config" >&2
 [ -f $config ] || touch $config
 
 read_config
@@ -97,7 +99,7 @@ if [ "$app_token" == "" ]; then
 fi
 
 echo "app_token $app_token" >&2
-echo "track_id: $track_id" >&2
+echo "track_id: $track_id"
 
 status='pending'
 echo -n 'waiting'
