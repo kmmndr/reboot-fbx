@@ -44,7 +44,7 @@ function post() {
                 -H "Content-Type: application/json" \
                 -H "$session_token_header" \
                 -d "$data" \
-                ${FREEBOX_BASE_URL}${url} | jq)
+                ${FREEBOX_BASE_URL}${url} | jq .)
 
   echo "RESULT:" >&2
   echo "$result" >&2
@@ -59,7 +59,7 @@ function get() {
 
   result=$(curl -s \
        ${FREEBOX_BASE_URL}${url} \
-       | jq)
+       | jq .)
 
   echo "RESULT:" >&2
   echo "$result" >&2
