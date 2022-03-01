@@ -16,6 +16,20 @@ Le programme nécéssite les applications suivantes:
 - openssl
 - awk
 
+## Installation
+
+Un fichier Makefile permet d'installer rapidement l'outil. Par défaut,
+l'installation s'effectue avec le prefixe /usr/local/. Il est possible de
+modifier ce comportement en renseignant la variable d'environnement PREFIX.
+
+```
+# installation par defaut dans /usr/local/bin/reboot-fbx
+make install
+
+# installation dans ~/.local/bin/reboot-fbx
+make -e PREFIX=~/.local install
+```
+
 ## Utilisation
 
 L'utilisation est très simple, il suffit de démarrer une première fois le
@@ -26,9 +40,8 @@ Le premier démarrage s'arrêtera là en indiquant un message d'erreur mentionna
 que les permissions sont insuffisantes.
 
 ```
-$ ./reboot-fbx.sh
-reboot-fbx.sh
-- config file: config
+$ reboot-fbx
+reboot-fbx
 api_version: 6.0
 waiting............
 Error: You must grant reboot permission
@@ -42,9 +55,7 @@ l'application la permission `Modification des réglages de la Freebox`.
 Les prochains démarrages du programme redémarreront la Freebox.
 
 ```
-$ ./reboot-fbx.sh
-reboot-fbx.sh
-- config file: config
+$ reboot-fbx
 api_version: 6.0
 waiting.
 Reboot initiated
@@ -62,7 +73,7 @@ d'environnement `FREEBOX_BASE_URL` comme ci-dessous. Ce comportement sera
 peut-être adopté par défaut lors d'une prochaine version.
 
 ```
-env FREEBOX_BASE_URL=https://mafreebox.freebox.fr ./reboot-fbx.sh
+env FREEBOX_BASE_URL=https://mafreebox.freebox.fr reboot-fbx
 ```
 
 Puisqu'il s'agit d'un certificat auto-signé, il sera enregistré dans
