@@ -2,17 +2,36 @@
 
 APP_ID="reboot-fbx.sh"
 APP_NAME="Reboot"
-APP_VERSION="0.0.1"
+APP_VERSION="0.0.2"
 DEVICE_NAME="$(hostname -s)"
-FREEBOX_BASE_URL='http://mafreebox.freebox.fr'
+FREEBOX_BASE_URL=${FREEBOX_BASE_URL:-'http://mafreebox.freebox.fr'}
 
 [ -z $DEBUG ] && exec 2>/dev/null || set -x
 echo "***DEBUG***" >&2
 
 config=${CONFIG:-"$HOME/.reboot-fbx.conf"}
+
+freebox_tls_cert=${FREEBOX_TLS_CERT:-"$HOME/.reboot-fbx.cert"}
+cacert_params=''
+
 # set -eu
 set -e
 set -o pipefail
+
+function get_tls_cert() {
+  if ! echo "$FREEBOX_BASE_URL" | grep '^https://' > /dev/null; then
+    return
+  fi
+
+  cacert_params="--cacert $freebox_tls_cert"
+  fbx_hostname=$(echo $FREEBOX_BASE_URL | awk -F/ '{print $3}')
+  if [ ! -f $freebox_tls_cert ]; then
+    echo 'quit' | openssl s_client \
+      -showcerts \
+      -servername $fbx_hostname \
+      -connect $fbx_hostname:443 > $freebox_tls_cert 2> /dev/null
+  fi
+}
 
 function read_config() {
   set -a
@@ -40,6 +59,7 @@ function post() {
   fi
 
   result=$(curl -s \
+                $cacert_params \
                 -X POST \
                 -H "Content-Type: application/json" \
                 -H "$session_token_header" \
@@ -58,6 +78,7 @@ function get() {
   echo "GET $url" >&2
 
   result=$(curl -s \
+                $cacert_params \
        ${FREEBOX_BASE_URL}${url} \
        | jq .)
 
@@ -78,6 +99,7 @@ echo "- config file: $config" >&2
 [ -f $config ] || touch $config
 
 read_config
+get_tls_cert
 
 api_version=$(get '/api_version' | jq -r '.api_version')
 echo "api_version: $api_version"
