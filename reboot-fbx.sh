@@ -74,13 +74,19 @@ function post() {
 
 function get() {
   url=$1
+  session_token=$2
 
   echo "GET $url" >&2
-
+  
+  if [ "$session_token" != "" ]; then
+    session_token_header="X-Fbx-App-Auth: $session_token"
+  fi
+  
   result=$(curl -s \
                 $cacert_params \
-       ${FREEBOX_BASE_URL}${url} \
-       | jq .)
+                -H "$session_token_header" \
+                ${FREEBOX_BASE_URL}${url} \
+                | jq .)
 
   echo "RESULT:" >&2
   echo "$result" >&2
